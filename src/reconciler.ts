@@ -51,7 +51,7 @@ const effieReconciler = reconciler<
   number /* TimeoutHandle */,
   -1 /* NoTimeout */
 >({
-  isPrimaryRenderer: true,
+  isPrimaryRenderer: false,
   supportsHydration: false,
   supportsMutation: false,
   supportsPersistence: true,

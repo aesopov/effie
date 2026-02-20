@@ -27,7 +27,7 @@ export function from<TStateFunction extends (props?: any) => State<TState>, TSta
   const propsNoRef = { ...props, key: props?.key ?? keyCounter++ };
   delete (propsNoRef as any).ref;
   const el = createElement(() => {
-    const result = props ? fn(props) : null;
+    const result = fn(props);
     const children: ReactElement[] = [];
     collectChildren(result, children);
     return createElement(

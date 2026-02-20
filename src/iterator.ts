@@ -4,11 +4,11 @@ import { isElement } from "react-is";
 export function clone(obj: any): any {
   if (obj === null || typeof obj !== "object") return obj;
 
-  let temp;
+  let temp: any;
   if (obj instanceof Date) {
     temp = new Date(obj);
   } else {
-    temp = obj.constructor();
+    temp = Array.isArray(obj) ? [] : {};
   }
 
   for (var key in obj) {
