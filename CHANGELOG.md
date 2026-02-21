@@ -1,5 +1,11 @@
 # effie
 
+## 0.0.6
+
+### Patch Changes
+
+- b9fca01: cicd
+
 ## 0.0.5
 
 ### Patch Changes
