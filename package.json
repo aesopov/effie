@@ -1,6 +1,6 @@
 {
   "name": "effie",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "State Management via React hooks",
   "license": "MIT",
   "author": {
