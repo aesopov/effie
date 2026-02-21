@@ -3,33 +3,35 @@ import { DefaultEventPriority } from "react-reconciler/constants";
 import { $ } from "./consts";
 import { clone, stateFiller } from "./iterator";
 
+type Setter = (val: unknown) => void;
+
 type SInfo = {
-  filler?: (val: any) => void;
+  filler?: Setter;
   total?: number;
   filled?: number;
 };
 
-type EffieType = "node";
-type EffieProps = { children: any[]; state: any };
+type EffieType = string;
+type EffieProps = { children: unknown[]; state: unknown };
 type EffieContainer = {
-  setState(newState: any): void;
-  state: any;
+  setState(newState: unknown): void;
+  state: unknown;
 };
 type EffieInstance = { [$]?: SInfo };
 type EffieTextInstance = null;
-type EffieSuspenseInstance = any;
-type EffieHydrableInstance = any;
-type EffiePublicInstance = any;
-type EffieHostContext = {};
-type EffieUpdatePayload = any;
-type EffieChildSet = { newState?: any };
+type EffieSuspenseInstance = never;
+type EffieHydrableInstance = never;
+type EffiePublicInstance = EffieInstance;
+type EffieHostContext = Record<string, never>;
+type EffieUpdatePayload = true;
+type EffieChildSet = { newState?: unknown };
 
-function createInstanceFromProps(props: EffieProps) {
-  const result = clone(props.state);
+function createInstanceFromProps(props: EffieProps): EffieInstance {
+  const result = clone(props.state) as EffieInstance;
 
   result[$] = {
     filler: stateFiller(result),
-    total: props.children.length,
+    total: (props.children as unknown[]).length,
     filled: 0,
   };
 
@@ -74,17 +76,16 @@ const effieReconciler = reconciler<
   //    Core Methods
   // -------------------
 
-  createInstance(type, props, rootContainer, hostContext, internalHandle) {
+  createInstance(_type, props) {
     return createInstanceFromProps(props);
   },
 
-  createTextInstance(text, rootContainer, hostContext, internalHandle) {
+  createTextInstance() {
     return null;
   },
 
   appendInitialChild(parentInstance, child) {
     if (parentInstance[$]) {
-      // console.info(child);
       parentInstance[$].filler?.(child);
       parentInstance[$].filled = (parentInstance[$].filled ?? 0) + 1;
       if (parentInstance[$].filled === parentInstance[$].total) {
@@ -93,85 +94,60 @@ const effieReconciler = reconciler<
     }
   },
 
-  finalizeInitialChildren: (
-    instance,
-    type,
-    props,
-    rootContainer,
-    hostContext
-  ) => {
+  finalizeInitialChildren(instance) {
     if (instance[$] && instance[$].filled === instance[$].total) {
       delete instance[$];
     }
     return false;
   },
 
-  prepareUpdate(
-    instance,
-    type,
-    oldProps,
-    newProps,
-    rootContainer,
-    hostContext
-  ) {
+  prepareUpdate() {
     return true;
   },
 
-  shouldSetTextContent: (type, props) => false,
+  shouldSetTextContent: () => false,
 
-  getRootHostContext: (rootContainer) => ({}),
+  getRootHostContext: () => ({} as EffieHostContext),
 
-  getChildHostContext: (parentHostContext, type, rootContainer) =>
-    parentHostContext,
+  getChildHostContext: (parentHostContext) => parentHostContext,
 
-  getPublicInstance: (instance) => {
-    return instance;
-  },
+  getPublicInstance: (instance) => instance!,
 
-  prepareForCommit: (containerInfo) => null,
+  prepareForCommit: () => null,
 
-  resetAfterCommit(containerInfo) {},
+  resetAfterCommit() {},
 
-  preparePortalMount(containerInfo) {},
+  preparePortalMount() {},
 
   // -------------------
   // Persistence Methods
   // -------------------
 
-  cloneInstance(
-    instance,
-    updatePayload,
-    type,
-    oldProps,
-    newProps,
-    internalInstanceHandle,
-    keepChildren,
-    recyclableInstance
-  ) {
+  cloneInstance(_instance, _updatePayload, _type, _oldProps, newProps) {
     return createInstanceFromProps(newProps);
   },
-  createContainerChildSet(container) {
+  createContainerChildSet() {
     return {};
   },
   appendChildToContainerChildSet(childSet, child) {
     childSet.newState = child;
   },
-  finalizeContainerChildren(container, newChildren) {},
+  finalizeContainerChildren() {},
   replaceContainerChildren(container, newChildren) {
     container.setState(newChildren.newState);
   },
-  cloneHiddenInstance(instance, type, props, internalInstanceHandle) {
+  cloneHiddenInstance(instance) {
     return instance;
   },
-  cloneHiddenTextInstance(instance, text, internalInstanceHandle) {
+  cloneHiddenTextInstance() {
     return null;
   },
 });
 
 effieReconciler.injectIntoDevTools({
-  bundleType: 1,
-  version: "0.0.1",
-  rendererPackageName: "effie",
+  bundleType: 0,
+  version: '0.0.7',
+  rendererPackageName: 'effie',
 });
 
 export default effieReconciler;

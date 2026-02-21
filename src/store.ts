@@ -1,4 +1,4 @@
-import { createElement, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 import { from } from "./from";
 import reconciler from "./reconciler";
 import { InferStateType, State, Store } from "./types";
@@ -7,13 +7,15 @@ import { ContextProvider } from "./createContextProvider";
 
 class Container {
   version = 0;
-  state: any;
-  subscribers: Set<() => void> = new Set();
-  setState = (newState: any) => {
+  state: unknown;
+  private subscribers = new Set<() => void>();
+
+  setState = (newState: unknown) => {
     this.version++;
     this.state = newState;
     this.subscribers.forEach((s) => s());
   };
+
   subscribe = (onStateChange: () => void) => {
     this.subscribers.add(onStateChange);
     return () => {
@@ -52,9 +54,9 @@ export function createStore<TState extends State<any>>(
     reconciler.updateContainer(from(stateFunction), container);
   }
 
-  const store: Partial<Store<TState>> = {
-    getState() {
-      return root.state;
+  const store: Store<TState> = {
+    getState(): InferStateType<TState> {
+      return root.state as InferStateType<TState>;
     },
     useSelector<O>(selector: (state: InferStateType<TState>) => O): O {
       let prevStateVersion = 0;
@@ -63,20 +65,19 @@ export function createStore<TState extends State<any>>(
         if (root.version === prevStateVersion) {
           return prevSelection;
         }
-        const selection = selector(root.state);
+        const selection = selector(root.state as InferStateType<TState>);
         prevStateVersion = root.version;
         prevSelection = selection;
         return selection;
       });
     },
+    Provider(props) {
+      return StoreProvider({
+        store,
+        children: props.children,
+      });
+    },
   };
 
-  store.Provider = (props) => {
-    return StoreProvider({
-      store: store as Store<TState>,
-      children: props.children,
-    });
-  };
-
-  return store as Store<TState>;
+  return store;
 }

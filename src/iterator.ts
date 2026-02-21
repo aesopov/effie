@@ -1,32 +1,34 @@
 import { ReactElement } from "react";
 import { isElement } from "react-is";
 
-export function clone(obj: any): any {
+export function clone<T>(obj: T): T {
   if (obj === null || typeof obj !== "object") return obj;
 
-  let temp: any;
+  let temp: Record<string, unknown> | unknown[];
   if (obj instanceof Date) {
-    temp = new Date(obj);
+    return new Date(obj as unknown as Date) as unknown as T;
   } else {
     temp = Array.isArray(obj) ? [] : {};
   }
 
-  for (var key in obj) {
-    const val = obj[key];
+  for (const key of Object.keys(obj)) {
+    const val = (obj as Record<string, unknown>)[key];
     if (isElement(val)) {
-      temp[key] = val;
+      (temp as Record<string, unknown>)[key] = val;
     } else {
-      temp[key] = clone(val);
+      (temp as Record<string, unknown>)[key] = clone(val);
     }
   }
-  return temp;
+  return temp as T;
 }
 
 function isObject(obj: unknown): obj is Record<string, unknown> {
   return typeof obj === "object" && obj != null;
 }
 
-function* fillerIterator(state: unknown, setter: (val: any) => void): Generator {
+type Setter = (val: unknown) => void;
+
+function* fillerIterator(state: unknown, setter: Setter): Generator<Setter> {
   if (isElement(state)) {
     yield setter;
     return;
@@ -38,8 +40,7 @@ function* fillerIterator(state: unknown, setter: (val: any) => void): Generator 
       });
     }
   } else if (isObject(state)) {
-    const entries = Object.entries(state);
-    for (const [k] of entries) {
+    for (const k of Object.keys(state)) {
       yield* fillerIterator(state[k], (val) => {
         state[k] = val;
       });
@@ -47,17 +48,19 @@ function* fillerIterator(state: unknown, setter: (val: any) => void): Generator 
   }
 }
 
-export function stateFiller(state: unknown) {
+export function stateFiller(state: unknown): Setter {
   const iter = fillerIterator(state, () => {});
   return (value: unknown) => {
     const x = iter.next();
-    x.value?.(value);
+    if (!x.done) {
+      x.value(value);
+    }
   };
 }
 
 export function collectChildren(state: unknown, children: ReactElement[]) {
   if (isElement(state)) {
-    children.push(state);
+    children.push(state as ReactElement);
     return;
   }
 

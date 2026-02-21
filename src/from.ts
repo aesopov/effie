@@ -1,31 +1,15 @@
-import { Attributes, ReactElement, RefAttributes, createElement } from "react";
-import { $stateType } from "./consts";
+import { ReactElement, createElement, Key } from "react";
 import { collectChildren } from "./iterator";
 import { State } from "./types";
 
-let keyCounter = 0;
-/* @internal */
-export function resetKeyCounter() {
-  keyCounter = 0;
-}
-
-interface StateFunction<P = {}, S = any> {
-  (props: P): State<S>;
-};
-
 export function from<TStateFunction extends (props?: any) => State<TState>, TState = any>(
   fn: TStateFunction,
-  props?: Parameters<TStateFunction>[0] & {
-    key?: any;
-    ref?: React.Ref<ReturnType<TStateFunction>[typeof $stateType]>;
+  props?: (Parameters<TStateFunction>[0] extends undefined ? object : Parameters<TStateFunction>[0]) & {
+    key?: Key;
   }
 ): ReturnType<TStateFunction> {
-// export function from<P extends {}, S = any>(
-//   fn: StateFunction<P>,
-//   props?: (RefAttributes<S> & P)
-// ): ReturnType<typeof fn> {
-  const propsNoRef = { ...props, key: props?.key ?? keyCounter++ };
-  delete (propsNoRef as any).ref;
+  const { ref, ...rest } = (props ?? {}) as Record<string, unknown>;
+  const propsNoRef = { ...rest, key: (rest.key as Key) ?? fn.name };
   const el = createElement(() => {
     const result = fn(props);
     const children: ReactElement[] = [];
@@ -34,11 +18,11 @@ export function from<TStateFunction extends (props?: any) => State<TState>, TSta
       fn.name,
       {
         state: result,
-        ref: props?.ref,
+        ref: ref as React.Ref<unknown>,
       },
       children
     );
   }, propsNoRef);
-  el.type.displayName = fn.name;
-  return el as any;
+  (el.type as { displayName?: string }).displayName = fn.name;
+  return el as ReturnType<TStateFunction>;
 }

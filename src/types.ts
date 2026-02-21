@@ -1,6 +1,6 @@
-import { $stateType } from "./consts";
+import type { $stateType } from "./consts";
 
-export type State<TState> = React.ReactNode & { [$stateType]: TState };
+export type State<TState> = React.ReactNode & { [K in typeof $stateType]: TState };
 
 export type InferStateType<T> = T extends State<infer S>
   ? InferStateType<S>
