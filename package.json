@@ -6,10 +6,10 @@
   "author": {
     "name": "Mikhail Isupov",
     "email": "lam0x86@gmail.com",
-    "url": "https://github.com/misupov"
+    "url": "https://github.com/aesopov"
   },
-  "homepage": "https://github.com/misupov/effie",
-  "repository": "github:misupov/effie",
+  "homepage": "https://github.com/aesopov/effie",
+  "repository": "github:aesopov/effie",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
