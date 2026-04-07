@@ -13,7 +13,7 @@ export default defineConfig(() => {
           format: "cjs",
         },
         {
-          file: "dist/index.js",
+          file: "dist/index.mjs",
           sourcemap: true,
           format: "esm",
         },
