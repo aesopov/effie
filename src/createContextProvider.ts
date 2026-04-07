@@ -5,7 +5,7 @@ export type ContextProvider = (children: React.ReactNode[]) => React.ReactElemen
 export function createContextProvider<
   TContextProviderProps extends Record<string, unknown>
 >(
-  fn: (props: TContextProviderProps) => React.ReactElement,
+  fn: (props: TContextProviderProps) => React.ReactNode,
   props: TContextProviderProps
 ): ContextProvider {
   return (children) => createElement(fn, { ...props, children });
