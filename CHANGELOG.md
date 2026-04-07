@@ -1,5 +1,11 @@
 # effie
 
+## 0.0.9
+
+### Patch Changes
+
+- 73f725a: React 19
+
 ## 0.0.8
 
 ### Patch Changes
