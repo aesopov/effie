@@ -1,4 +1,6 @@
 import { defineConfig } from "rollup";
+import commonjs from "@rollup/plugin-commonjs";
+import nodeResolve from "@rollup/plugin-node-resolve";
 import typescript from '@rollup/plugin-typescript';
 import terser from "@rollup/plugin-terser";
 
@@ -19,12 +21,17 @@ export default defineConfig(() => {
         },
       ],
       external: [
-        "react-reconciler",
-        "react-reconciler/constants",
-        "react-is",
         "react",
       ],
-      plugins: [typescript(), terser()],
+      plugins: [
+        nodeResolve({
+          browser: true,
+          exportConditions: ["browser", "import", "default"],
+        }),
+        commonjs(),
+        typescript(),
+        terser(),
+      ],
     },
   ];
 });
