@@ -1,5 +1,11 @@
 # effie
 
+## 0.0.10
+
+### Patch Changes
+
+- 2e96612: esm fix
+
 ## 0.0.9
 
 ### Patch Changes
